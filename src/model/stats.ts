@@ -1,5 +1,4 @@
 export type DashboardStats = {
-  name: string;
   total: number;
   completed: number;
   unfinished: number;
@@ -18,4 +17,6 @@ export type DashboardStats = {
     title: string;
     deleted_at: string;
   }>;
+  totalActive: number;
+  totalDeleted: number;
 };

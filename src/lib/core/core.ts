@@ -168,18 +168,7 @@ export async function getProjectByUser({
   return { success: true, project };
 }
 
-export async function getDashboardStats({
-  projectSlug,
-  userSlug,
-}: {
-  projectSlug: string;
-  userSlug: string;
-}): Promise<DashboardStats> {
-  const { project } = await getProjectByUser({ projectSlug, userSlug });
-  if (!project) throw new Error('Project not found');
-
-  const tasks = project.tasks;
-
+export async function getDashboardStats({ tasks }: { tasks: Task[] }): Promise<DashboardStats> {
   // --- BASIC COUNTS ---
   const total = tasks.length;
   const completed = tasks.filter(t => t.is_completed && !t.is_deleted).length;
@@ -246,8 +235,10 @@ export async function getDashboardStats({
         : 'N/A',
     }));
 
+  const totalActive = tasks.filter(t => !t.is_deleted).length;
+  const totalDeleted = tasks.filter(t => t.is_deleted).length;
+
   return {
-    name: project.name,
     total,
     completed,
     unfinished,
@@ -257,6 +248,8 @@ export async function getDashboardStats({
     mostActiveDay,
     overdueTodos,
     recentlyDeleted,
+    totalActive,
+    totalDeleted,
   };
 }
 
@@ -276,8 +269,7 @@ export async function getTaks({
   return project.tasks
     .filter(t => {
       if (isDeleted !== undefined && t.is_deleted !== isDeleted) return false;
-      if (isCompleted !== undefined && t.is_completed !== isCompleted) return false;
-      return true;
+      return !(isCompleted !== undefined && t.is_completed !== isCompleted);
     })
     .map(toTaskDTO);
 }

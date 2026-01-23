@@ -1,7 +1,8 @@
 import { ReactNode } from 'react';
 import SideNav from '@/components/SideNav';
-import { prependBasePath, projectPath, sitePaths } from '@/lib/path/sitePaths';
+import { getProjectPath, prependBasePath, sitePaths } from '@/lib/path/sitePaths';
 import { PageProps } from '@/model/page';
+import { icons } from '@/components/icons/icons';
 
 export default async function Layout({
   children,
@@ -12,16 +13,25 @@ export default async function Layout({
   } & PageProps
 >) {
   const { projectSlug, userSlug } = await params;
-  const prependedPaths = prependBasePath(projectPath(userSlug, projectSlug), [
-    sitePaths.homeProject,
-    sitePaths.create,
-    sitePaths.incomplete,
-    sitePaths.complete,
-    sitePaths.trash,
-  ]);
+
+  const homePath = getProjectPath({ userSlug, label: 'Home', icon: icons.home });
+  const projectsPath = getProjectPath({
+    userSlug,
+    projectSlug,
+    label: 'Project',
+    icon: icons.project,
+  });
+  const subpaths = prependBasePath(
+    getProjectPath({
+      userSlug,
+      projectSlug,
+    }).href,
+    [sitePaths.create, sitePaths.trash]
+  );
+
   return (
     <div className="flex min-h-screen w-full justify-center">
-      <SideNav paths={prependedPaths} />
+      <SideNav paths={[homePath, projectsPath, ...subpaths]} />
       <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
     </div>
   );

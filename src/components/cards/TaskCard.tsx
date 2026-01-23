@@ -3,7 +3,6 @@
 import { TaskDTO } from '@/model/task';
 
 type TodoCardProps = {
-  disabled: boolean;
   description?: string | null;
   toggleAction: (slug: string, isCompleted: boolean) => void;
   deleteAction: (slug: string, isDeleted: boolean) => void;
@@ -11,7 +10,6 @@ type TodoCardProps = {
 
 export default function TaskCard({
   title,
-  disabled,
   description,
   isCompleted,
   isDeleted,
@@ -41,9 +39,8 @@ export default function TaskCard({
         </div>
 
         <button
-          disabled={disabled}
           onClick={() => toggleAction(slug, !isCompleted)}
-          className={`relative inline-flex h-5 w-10 items-center rounded-full transition-all duration-200 ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:brightness-110 active:scale-95'} ${isCompleted ? 'bg-green-500' : 'bg-gray-600'} `}
+          className={`relative inline-flex h-5 w-10 cursor-pointer items-center rounded-full transition-all duration-200 hover:brightness-110 active:scale-95 ${isCompleted ? 'bg-green-500' : 'bg-gray-600'} `}
         >
           <span
             className={`inline-block h-4 w-4 transform rounded-full bg-gray-200 transition ${
@@ -63,8 +60,7 @@ export default function TaskCard({
         <div className="rounded-md bg-gray-800 px-2 py-1">
           <button
             onClick={() => deleteAction(slug, !isDeleted)}
-            disabled={disabled}
-            className={`text-xs transition-all duration-200 disabled:opacity-50 ${disabled ? 'cursor-not-allowed' : 'cursor-pointer active:scale-95'} ${
+            className={`active:scale-95' cursor-pointer text-xs transition-all duration-200 disabled:opacity-50 ${
               isDeleted
                 ? 'text-blue-400 hover:text-blue-300 hover:brightness-110'
                 : 'text-red-400 hover:text-red-300 hover:brightness-110'

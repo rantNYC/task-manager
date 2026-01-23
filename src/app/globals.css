@@ -1,5 +1,41 @@
 @import "tailwindcss";
 
+@theme {
+    @keyframes shake {
+        0%, 100% {
+            transform: translateX(0)
+        }
+        20% {
+            transform: translateX(-2px)
+        }
+        40% {
+            transform: translateX(2px)
+        }
+        60% {
+            transform: translateX(-2px)
+        }
+        80% {
+            transform: translateX(2px)
+        }
+    } @keyframes wiggle {
+          0%, 100% {
+              transform: rotate(-3deg)
+          }
+          50% {
+              transform: rotate(3deg)
+          }
+      } @keyframes pulse-slow {
+            0%, 100% {
+                opacity: 1
+            }
+            50% {
+                opacity: 0.6
+            }
+        } --animate-shake: shake 0.3s ease-in-out;
+    --animate-wiggle: wiggle 0.3s ease-in-out;
+    --animate-pulse-slow: pulse-slow 1.5s ease-in-out infinite;
+}
+
 :root {
     --background: #ffffff;
     --foreground: #171717;

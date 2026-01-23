@@ -1,11 +1,13 @@
 import { createProject } from '@/lib/core/core';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { sitePaths } from '@/lib/path/sitePaths';
+import { getProjectPath } from '@/lib/path/sitePaths';
 import { getSessionOrRedirect } from '@/lib/path/session';
+import { PageProps } from '@/model/page';
 
-export default async function ProjectCreatePage() {
+export default async function ProjectCreatePage({ params }: PageProps) {
   const { email } = await getSessionOrRedirect();
+  const { userSlug } = await params;
 
   const createProjectAction = async (formData: FormData) => {
     'use server';
@@ -20,7 +22,7 @@ export default async function ProjectCreatePage() {
     const { success, project } = await createProject({ email, name, description });
 
     if (success) {
-      revalidatePath(sitePaths.project.href);
+      revalidatePath(getProjectPath({ userSlug }).href);
       redirect(project.slug);
     }
   };

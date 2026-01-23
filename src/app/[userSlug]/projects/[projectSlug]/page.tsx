@@ -1,17 +1,22 @@
-import { getDashboardStats } from '@/lib/core/core';
+import { getDashboardStats, getProjectByUser } from '@/lib/core/core';
 import { StatCard } from '@/components/cards/StatCard';
 import { WideCard } from '@/components/cards/WideCard';
 import { DeletedList } from '@/components/cards/DeletedList';
-import Link from 'next/link';
-import { projectPath, sitePaths } from '@/lib/path/sitePaths';
 import { PageProps } from '@/model/page';
+import { toTaskDTO } from '@/lib/core/utils';
+import TaskGrid from '@/components/TaskGrid';
 
 export default async function ProjectPage({ params }: PageProps) {
   const { projectSlug, userSlug } = await params;
 
+  const { project } = await getProjectByUser({ projectSlug, userSlug });
+  if (!project) {
+    throw new Error('Project not found');
+  }
   const {
-    name,
     total,
+    totalActive,
+    totalDeleted,
     completed,
     unfinished,
     completionRate,
@@ -19,33 +24,40 @@ export default async function ProjectPage({ params }: PageProps) {
     avgCompletionTime,
     mostActiveDay,
     recentlyDeleted,
-  } = await getDashboardStats({ projectSlug, userSlug });
+  } = await getDashboardStats({ tasks: project.tasks });
+
+  const activeTasks = project.tasks.map(toTaskDTO).filter(t => !t.isDeleted);
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-      <h1 className="col-span-full text-2xl font-semibold">Project Name: {name}</h1>
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <h1 className="col-span-full text-3xl font-bold tracking-tight text-gray-100">
+        {project.name}
+      </h1>
 
+      <h2 className="col-span-full max-w-3xl text-lg leading-relaxed text-gray-400">
+        {project.description}
+      </h2>
+
+      <StatCard title="Completed" value={completed} />
+      <StatCard title="Incomplete" value={unfinished} />
       <StatCard title="Total Todos" value={total} />
+      <StatCard title="Total Active" value={totalActive} />
+      <StatCard title="Total Deleted" value={totalDeleted} />
       <StatCard title="Completion Rate" value={`${completionRate}%`} />
-
-      <Link href={projectPath(userSlug, projectSlug, sitePaths.complete.href)}>
-        <StatCard title="Completed" value={completed} />
-      </Link>
-      <Link href={projectPath(userSlug, projectSlug, sitePaths.incomplete.href)}>
-        <StatCard title="Incomplete" value={unfinished} />
-      </Link>
-
       <WideCard title="Completed This Week">{completedThisWeek}</WideCard>
-
       <WideCard title="Average Completion Time">
         {avgCompletionTime ? `${(avgCompletionTime / 3600).toFixed(1)} hours` : 'N/A'}
       </WideCard>
-
       <WideCard title="Most Active Day">{mostActiveDay}</WideCard>
-
       <WideCard title="Recently Deleted">
         <DeletedList items={recentlyDeleted} />
       </WideCard>
+      {activeTasks.length > 0 && (
+        <div className="col-span-full">
+          <h2 className="mb-2 text-xl font-semibold">Tasks</h2>
+          <TaskGrid tasks={activeTasks} />
+        </div>
+      )}
     </div>
   );
 }

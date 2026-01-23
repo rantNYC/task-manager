@@ -2,7 +2,7 @@ import { getSessionOrRedirect } from '@/lib/path/session';
 import { findUserByEmail } from '@/lib/core/core';
 import { StatCard } from '@/components/cards/StatCard';
 import Link from 'next/link';
-import { sitePaths } from '@/lib/path/sitePaths';
+import { getProjectPath, sitePaths } from '@/lib/path/sitePaths';
 import { ProjectList } from '@/components/cards/ProjectList';
 
 export default async function ProjectsPage() {
@@ -44,7 +44,10 @@ export default async function ProjectsPage() {
             <p className="text-sm text-gray-400">No projects yet. Start by creating one.</p>
           </div>
         ) : (
-          <ProjectList items={user?.projects.filter(p => !p.is_deleted) ?? []} />
+          <ProjectList
+            items={user?.projects ?? []}
+            projectPath={getProjectPath({ userSlug: user?.slug ?? '' }).href}
+          />
         )}
       </div>
     </div>

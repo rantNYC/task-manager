@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { sitePaths } from '@/lib/path/sitePaths';
 import { deleteProjectAction } from '@/lib/actions/projectAction';
+import { icons } from '@/components/icons/icons';
 
 type ProjectListProps = {
   items: {
@@ -10,9 +10,10 @@ type ProjectListProps = {
     slug?: string;
     is_deleted: boolean;
   }[];
+  projectPath: string;
 };
 
-export function ProjectList({ items }: ProjectListProps) {
+export function ProjectList({ items, projectPath }: ProjectListProps) {
   return (
     <ul className="flex flex-col gap-3">
       {items.map(project => (
@@ -32,28 +33,10 @@ export function ProjectList({ items }: ProjectListProps) {
           <div className="flex items-center gap-3">
             {/* Eye icon → open project */}
             <Link
-              href={`${sitePaths.project.href}/${project.slug}`}
+              href={`${projectPath}/${project.slug}`}
               className="rounded p-1 text-gray-400 hover:bg-gray-800 hover:text-white"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
+              {icons.view}
             </Link>
 
             {/* Trash icon → delete project (server action) */}
@@ -64,20 +47,7 @@ export function ProjectList({ items }: ProjectListProps) {
                 type="submit"
                 className="rounded p-1 text-gray-400 hover:cursor-pointer hover:bg-gray-800 hover:text-red-400"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 7h12M9 7V4h6v3m-7 4v7m4-7v7m4-7v7M4 7h16l-1 13H5L4 7z"
-                  />
-                </svg>
+                {icons.trash}
               </button>
             </form>
           </div>

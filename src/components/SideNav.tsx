@@ -2,45 +2,28 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { PathMetadata } from '@/lib/path/sitePaths';
 
-export default function SideNav({ paths }: { paths: Array<{ href: string; label: string }> }) {
+export default function SideNav({ paths }: { paths: PathMetadata[] }) {
   const pathname = usePathname();
+
   return (
-    <aside className="w-56 shrink-0 border-r border-gray-700/40 bg-gray-900/40 p-4">
+    <aside className="w-60 shrink-0 border-r border-gray-800 bg-gray-900/60 p-4 backdrop-blur-sm">
       <nav className="flex flex-col gap-1">
-        <Link
-          href="/"
-          className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${pathname === '/' ? 'bg-gray-700 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="h-5 w-5"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H3.75A.75.75 0 013 21V9.75z"
-            />
-          </svg>
-          Home
-        </Link>
         {paths.map(item => {
           const active = pathname === item.href;
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`cursor-pointer rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+              className={`group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                 active
-                  ? 'bg-gray-700 text-white'
+                  ? 'bg-indigo-600 text-white shadow-sm'
                   : 'text-gray-300 hover:bg-gray-800 hover:text-white'
               }`}
             >
-              {item.label}
+              {item.icon && <span>{item.icon}</span>}
+              <span>{item.label}</span>
             </Link>
           );
         })}

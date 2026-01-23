@@ -1,23 +1,16 @@
-'use client';
-
 import { completeTodo, deleteTodo } from '@/lib/actions/taskAction';
 import TaskCard from './cards/TaskCard';
-import { useState } from 'react';
 import { TaskDTO } from '@/model/task';
 
 export default function TaskGrid({ tasks }: { tasks: Array<TaskDTO> }) {
-  const [isLoading, setIsLoading] = useState(false);
-
   const handleToggle = async (slug: string, isCompleted: boolean) => {
-    setIsLoading(true);
+    'use server';
     await completeTodo(slug, isCompleted, '/');
-    setIsLoading(false);
   };
 
   const handleDelete = async (slug: string, isDeleted: boolean) => {
-    setIsLoading(true);
+    'use server';
     await deleteTodo(slug, isDeleted, '/');
-    setIsLoading(false);
   };
 
   return (
@@ -30,7 +23,6 @@ export default function TaskGrid({ tasks }: { tasks: Array<TaskDTO> }) {
           description={item.description}
           isCompleted={item.isCompleted}
           isDeleted={item.isDeleted}
-          disabled={isLoading}
           toggleAction={handleToggle}
           deleteAction={handleDelete}
         />
