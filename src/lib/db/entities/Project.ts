@@ -28,12 +28,6 @@ export class Project {
   @Column({ type: 'text', nullable: true })
   description!: string | null;
 
-  @Column({ type: 'boolean', default: false })
-  is_completed!: boolean;
-
-  @Column({ type: 'timestamp', nullable: true })
-  completed_at!: Date | null;
-
   @CreateDateColumn({ type: 'timestamp' })
   created_at!: Date;
 

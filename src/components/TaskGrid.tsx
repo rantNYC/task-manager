@@ -1,31 +1,15 @@
-import { completeTodo, deleteTodo } from '@/lib/actions/taskAction';
 import TaskCard from './cards/TaskCard';
-import { TaskDTO } from '@/model/task';
+import { Task } from '@/lib/db/entities/Task';
+import { handleAction } from '@/lib/actions/taskAction';
 
-export default function TaskGrid({ tasks }: { tasks: Array<TaskDTO> }) {
-  const handleToggle = async (slug: string, isCompleted: boolean) => {
-    'use server';
-    await completeTodo(slug, isCompleted, '/');
-  };
-
-  const handleDelete = async (slug: string, isDeleted: boolean) => {
-    'use server';
-    await deleteTodo(slug, isDeleted, '/');
-  };
-
+export default function TaskGrid({ tasks }: { tasks: Array<Task> }) {
+  const gridCols = tasks.length === 1 ? 'grid-cols-1' : 'grid-cols-2';
   return (
-    <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className={`grid ${gridCols} items-stretch gap-4`}>
       {tasks.map((item, idx) => (
-        <TaskCard
-          key={`todo-card-${idx}`}
-          slug={item.slug}
-          title={item.title}
-          description={item.description}
-          isCompleted={item.isCompleted}
-          isDeleted={item.isDeleted}
-          toggleAction={handleToggle}
-          deleteAction={handleDelete}
-        />
+        <div key={`todo-card-${idx}`} className="h-full">
+          <TaskCard task={item} handleAction={handleAction} />{' '}
+        </div>
       ))}
     </div>
   );

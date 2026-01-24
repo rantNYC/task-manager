@@ -17,23 +17,88 @@
         80% {
             transform: translateX(2px)
         }
-    } @keyframes wiggle {
-          0%, 100% {
-              transform: rotate(-3deg)
-          }
-          50% {
-              transform: rotate(3deg)
-          }
-      } @keyframes pulse-slow {
-            0%, 100% {
-                opacity: 1
-            }
-            50% {
-                opacity: 0.6
-            }
-        } --animate-shake: shake 0.3s ease-in-out;
+    }
+    @keyframes wiggle {
+        0%, 100% {
+            transform: rotate(-3deg)
+        }
+        50% {
+            transform: rotate(3deg)
+        }
+    }
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1
+        }
+        50% {
+            opacity: 0.6
+        }
+    }
+    @keyframes bounce {
+        0%, 100% {
+            transform: translateY(0)
+        }
+        50% {
+            transform: translateY(-3px)
+        }
+    }
+    @keyframes spin-slow {
+        0% {
+            transform: rotate(0deg)
+        }
+        100% {
+            transform: rotate(180deg)
+        }
+    }
+    @keyframes pop {
+        0% {
+            transform: scale(1)
+        }
+        50% {
+            transform: scale(1.2)
+        }
+        100% {
+            transform: scale(1)
+        }
+    }
+    @keyframes glow {
+        0%, 100% {
+            opacity: 1;
+            filter: drop-shadow(0 0 0px currentColor)
+        }
+        50% {
+            opacity: 0.85;
+            filter: drop-shadow(0 0 4px currentColor)
+        }
+    }
+    @keyframes slide-in {
+        0% {
+            transform: translateX(-4px);
+            opacity: 0
+        }
+        100% {
+            transform: translateX(0);
+            opacity: 1
+        }
+    }
+    @keyframes tilt {
+        0%, 100% {
+            transform: rotate(0deg)
+        }
+        50% {
+            transform: rotate(25deg)
+        }
+    }
+
+    --animate-tilt: tilt 0.3s ease-in-out;
+    --animate-slide-in: slide-in 0.25s ease-out;
+    --animate-glow: glow 1.2s ease-in-out infinite;
+    --animate-pop: pop 0.25s ease-out;
+    --animate-spin-slow: spin-slow 0.4s ease-in-out;
+    --animate-bounce: bounce 0.35s ease-in-out;
+    --animate-shake: shake 0.3s ease-in-out;
     --animate-wiggle: wiggle 0.3s ease-in-out;
-    --animate-pulse-slow: pulse-slow 1.5s ease-in-out infinite;
+    --animate-pulse: pulse 1s ease-in-out infinite;
 }
 
 :root {
@@ -85,4 +150,32 @@ body {
 
 .animate-trashFall {
     animation: trashFall 0.35s ease-out forwards;
+}
+
+/* Light mode scrollbar */
+.scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #9ca3af transparent; /* thumb, track */
+}
+
+.scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+    background-color: #9ca3af; /* gray-400 */
+    border-radius: 9999px;
+}
+
+/* Dark mode scrollbar */
+.dark .scrollbar {
+    scrollbar-color: #4b5563 transparent; /* thumb, track */
+}
+
+.dark .scrollbar::-webkit-scrollbar-thumb {
+    background-color: #4b5563; /* gray-600 */
 }

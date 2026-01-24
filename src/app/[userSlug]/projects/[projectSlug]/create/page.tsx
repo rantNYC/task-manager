@@ -64,7 +64,7 @@ export default async function CreateTaskPage({ params }: PageProps) {
           <textarea
             id="description"
             name="description"
-            rows={3}
+            rows={10}
             maxLength={500}
             placeholder="Describe your task..."
             className="w-full rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 shadow-sm transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"

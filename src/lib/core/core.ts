@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import { getDb, getProjectRepository, getTaskRepository, getUserRepository, } from '@/lib/db/data-source';
 import { User } from '@/lib/db/entities/User';
 import { Task } from '@/lib/db/entities/Task';
-import { slugify, toTaskDTO } from '@/lib/core/utils';
+import { slugify } from '@/lib/core/utils';
 import { DashboardStats } from '@/model/stats';
 import { Project } from '@/lib/db/entities/Project';
 import { Repository } from 'typeorm';
@@ -59,15 +59,13 @@ export async function verifyUser(email: string, password: string) {
   };
 }
 
-type All = Task | Project;
-
 export async function getAll({
   repo,
   slug,
 }: {
   repo: 'project' | 'task';
   slug: string;
-}): Promise<{ db: Repository<All>; all: All | null }> {
+}): Promise<{ db: Repository<Task | Project>; all: Task | Project | null }> {
   switch (repo) {
     case 'project':
       const projectDb = await getProjectRepository();
@@ -80,17 +78,11 @@ export async function getAll({
   }
 }
 
-export async function markAsValue<J extends All, K extends keyof J>({
-  slug,
-  column,
-  value,
-  repo,
-}: {
-  slug: string;
-  column: K;
-  value: J[K];
-  repo: 'project' | 'task';
-}) {
+type MarkAsValueInput =
+  | { repo: 'task'; slug: string; column: keyof Task; value: Task[keyof Task] }
+  | { repo: 'project'; slug: string; column: keyof Project; value: Project[keyof Project] };
+
+export async function markAsValue({ slug, column, value, repo }: MarkAsValueInput) {
   const { db, all } = await getAll({ slug, repo });
   if (!all) {
     throw new Error('Value not found');
@@ -230,8 +222,24 @@ export async function getDashboardStats({ tasks }: { tasks: Task[] }): Promise<D
     .map(t => ({
       id: t.id,
       title: t.title,
-      deleted_at: t.deleted_at
+      localized: t.deleted_at
         ? new Date(t.deleted_at).toLocaleString() // ← localized output
+        : 'N/A',
+    }));
+
+  const recentlyCompleted = tasks
+    .filter(t => t.is_completed && !t.is_deleted)
+    .sort((a, b) => {
+      const aTime = a.completed_at ? new Date(a.completed_at).getTime() : 0;
+      const bTime = b.completed_at ? new Date(b.completed_at).getTime() : 0;
+      return bTime - aTime;
+    })
+    .slice(0, 5) // or however many you want
+    .map(t => ({
+      id: t.id,
+      title: t.title,
+      localized: t.completed_at
+        ? new Date(t.completed_at).toLocaleString() // ← localized output
         : 'N/A',
     }));
 
@@ -248,6 +256,7 @@ export async function getDashboardStats({ tasks }: { tasks: Task[] }): Promise<D
     mostActiveDay,
     overdueTodos,
     recentlyDeleted,
+    recentlyCompleted,
     totalActive,
     totalDeleted,
   };
@@ -266,10 +275,8 @@ export async function getTaks({
 }) {
   const { project } = await getProjectByUser({ projectSlug, userSlug });
   if (!project) throw new Error('Project not found');
-  return project.tasks
-    .filter(t => {
-      if (isDeleted !== undefined && t.is_deleted !== isDeleted) return false;
-      return !(isCompleted !== undefined && t.is_completed !== isCompleted);
-    })
-    .map(toTaskDTO);
+  return project.tasks.filter(t => {
+    if (isDeleted !== undefined && t.is_deleted !== isDeleted) return false;
+    return !(isCompleted !== undefined && t.is_completed !== isCompleted);
+  });
 }

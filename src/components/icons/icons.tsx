@@ -6,7 +6,7 @@ export const icons = {
       viewBox="0 0 24 24"
       strokeWidth={1.5}
       stroke="currentColor"
-      className="group-hover:animate-pulse-slow h-5 w-5 transition-all duration-200 group-hover:scale-110 group-hover:text-indigo-400"
+      className="h-5 w-5 transition-all duration-200 group-hover:scale-110 group-hover:animate-pulse group-hover:text-indigo-400"
     >
       <path
         strokeLinecap="round"
@@ -35,7 +35,7 @@ export const icons = {
   view: (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className="group-hover:animate-pulse-slow h-5 w-5 transition-all duration-200 group-hover:scale-110 group-hover:text-indigo-400"
+      className="group-hover:animate-glow h-5 w-5 transition-all duration-200 group-hover:scale-110 group-hover:text-indigo-400"
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -56,7 +56,7 @@ export const icons = {
       fill="none"
       stroke="currentColor"
       strokeWidth="1.5"
-      className="h-5 w-5 transition-all duration-200 group-hover:scale-110 group-hover:text-indigo-400"
+      className="group-hover:animate-pop h-5 w-5 transition-all duration-200 group-hover:scale-110 group-hover:text-indigo-400"
     >
       <path
         strokeLinecap="round"
@@ -73,9 +73,30 @@ export const icons = {
       viewBox="0 0 24 24"
       strokeWidth={1.5}
       stroke="currentColor"
-      className="h-5 w-5 transition-all duration-200 group-hover:scale-125 group-hover:text-green-400"
+      className="group-hover:animate-tilt h-5 w-5 transition-all duration-200 group-hover:scale-125 group-hover:text-green-400"
     >
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    </svg>
+  ),
+  restore: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      className="group-hover:animate-spin-slow h-5 w-5 transition-all duration-200 group-hover:scale-110 group-hover:text-blue-400"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4.5 9A7.5 7.5 0 0112 4.5c2.485 0 4.71 1.14 6.15 3M19.5 6v3h-3"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M19.5 15A7.5 7.5 0 0112 19.5c-2.485 0-4.71-1.14-6.15-3M4.5 18v-3h3"
+      />
     </svg>
   ),
 };

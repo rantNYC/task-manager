@@ -12,11 +12,14 @@ export type DashboardStats = {
 
   overdueTodos: number;
 
-  recentlyDeleted: Array<{
-    id: number;
-    title: string;
-    deleted_at: string;
-  }>;
+  recentlyDeleted: Array<TaskInformation>;
+  recentlyCompleted: Array<TaskInformation>;
   totalActive: number;
   totalDeleted: number;
+};
+
+export type TaskInformation = {
+  id: number;
+  title: string;
+  localized: string;
 };

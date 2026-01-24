@@ -26,3 +26,19 @@ export async function deleteTodo(slug: string, isDeleted: boolean, path: string)
     revalidatePath(path);
   }
 }
+
+export async function handleAction(formData: FormData) {
+  const slug = formData.get('slug') as string;
+  const action = formData.get('action') as string;
+
+  switch (action) {
+    case 'complete':
+      return completeTodo(slug, true, '/');
+    case 'uncomplete':
+      return completeTodo(slug, false, '/');
+    case 'delete':
+      return deleteTodo(slug, true, '/');
+    case 'restore':
+      return deleteTodo(slug, false, '/');
+  }
+}

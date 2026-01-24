@@ -1,17 +1,18 @@
 import { getDashboardStats, getProjectByUser } from '@/lib/core/core';
 import { StatCard } from '@/components/cards/StatCard';
 import { WideCard } from '@/components/cards/WideCard';
-import { DeletedList } from '@/components/cards/DeletedList';
+import { TaskList } from '@/components/cards/TaskList';
 import { PageProps } from '@/model/page';
-import { toTaskDTO } from '@/lib/core/utils';
+import { formatDuration } from '@/lib/core/utils';
 import TaskGrid from '@/components/TaskGrid';
+import { notFound } from 'next/dist/client/components/not-found';
 
 export default async function ProjectPage({ params }: PageProps) {
   const { projectSlug, userSlug } = await params;
 
   const { project } = await getProjectByUser({ projectSlug, userSlug });
   if (!project) {
-    throw new Error('Project not found');
+    notFound();
   }
   const {
     total,
@@ -24,9 +25,12 @@ export default async function ProjectPage({ params }: PageProps) {
     avgCompletionTime,
     mostActiveDay,
     recentlyDeleted,
+    recentlyCompleted,
   } = await getDashboardStats({ tasks: project.tasks });
 
-  const activeTasks = project.tasks.map(toTaskDTO).filter(t => !t.isDeleted);
+  const activeTasks = project.tasks
+    .filter(t => !t.is_deleted)
+    .sort((t1, t2) => t2.created_at.getTime() - t1.created_at.getTime());
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -45,12 +49,16 @@ export default async function ProjectPage({ params }: PageProps) {
       <StatCard title="Total Deleted" value={totalDeleted} />
       <StatCard title="Completion Rate" value={`${completionRate}%`} />
       <WideCard title="Completed This Week">{completedThisWeek}</WideCard>
+
       <WideCard title="Average Completion Time">
-        {avgCompletionTime ? `${(avgCompletionTime / 3600).toFixed(1)} hours` : 'N/A'}
+        {avgCompletionTime ? `${formatDuration(avgCompletionTime)}` : 'N/A'}
       </WideCard>
       <WideCard title="Most Active Day">{mostActiveDay}</WideCard>
+      <WideCard title={'Recently Completed'}>
+        <TaskList items={recentlyCompleted} />
+      </WideCard>
       <WideCard title="Recently Deleted">
-        <DeletedList items={recentlyDeleted} />
+        <TaskList items={recentlyDeleted} />
       </WideCard>
       {activeTasks.length > 0 && (
         <div className="col-span-full">

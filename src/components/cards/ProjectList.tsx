@@ -34,7 +34,7 @@ export function ProjectList({ items, projectPath }: ProjectListProps) {
             {/* Eye icon → open project */}
             <Link
               href={`${projectPath}/${project.slug}`}
-              className="rounded p-1 text-gray-400 hover:bg-gray-800 hover:text-white"
+              className="group rounded p-1 text-gray-400 hover:bg-gray-800 hover:text-white"
             >
               {icons.view}
             </Link>
@@ -45,9 +45,9 @@ export function ProjectList({ items, projectPath }: ProjectListProps) {
               <input type="hidden" name="isDeleted" value={String(!project.is_deleted)} />
               <button
                 type="submit"
-                className="rounded p-1 text-gray-400 hover:cursor-pointer hover:bg-gray-800 hover:text-red-400"
+                className="group rounded p-1 text-gray-400 hover:cursor-pointer hover:bg-gray-800 hover:text-red-400"
               >
-                {icons.trash}
+                {project.is_deleted ? icons.restore : icons.trash}
               </button>
             </form>
           </div>

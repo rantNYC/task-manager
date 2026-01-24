@@ -30,9 +30,9 @@ export default async function Layout({
   );
 
   return (
-    <div className="flex min-h-screen w-full justify-center">
-      <SideNav paths={[homePath, projectsPath, ...subpaths]} />
-      <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
+    <div className="flex h-screen w-full overflow-hidden">
+      <SideNav paths={[projectsPath, ...subpaths]} footer={homePath} />
+      <div className="scrollbar flex flex-1 flex-col gap-4 overflow-y-auto p-4">{children}</div>
     </div>
   );
 }
