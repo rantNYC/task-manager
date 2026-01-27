@@ -26,7 +26,7 @@ export default async function Layout({
       userSlug,
       projectSlug,
     }).href,
-    [sitePaths.create, sitePaths.trash]
+    [sitePaths.create, sitePaths.trash, sitePaths.tasks]
   );
 
   return (

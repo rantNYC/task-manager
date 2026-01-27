@@ -4,8 +4,9 @@ import { WideCard } from '@/components/cards/WideCard';
 import { TaskList } from '@/components/cards/TaskList';
 import { PageProps } from '@/model/page';
 import { formatDuration } from '@/lib/core/utils';
-import TaskGrid from '@/components/TaskGrid';
 import { notFound } from 'next/dist/client/components/not-found';
+import { getProjectPath, sitePaths } from '@/lib/path/sitePaths';
+import Link from 'next/link';
 
 export default async function ProjectPage({ params }: PageProps) {
   const { projectSlug, userSlug } = await params;
@@ -28,10 +29,6 @@ export default async function ProjectPage({ params }: PageProps) {
     recentlyCompleted,
   } = await getDashboardStats({ tasks: project.tasks });
 
-  const activeTasks = project.tasks
-    .filter(t => !t.is_deleted)
-    .sort((t1, t2) => t2.created_at.getTime() - t1.created_at.getTime());
-
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
       <h1 className="col-span-full text-3xl font-bold tracking-tight text-gray-100">
@@ -42,8 +39,10 @@ export default async function ProjectPage({ params }: PageProps) {
         {project.description}
       </h2>
 
+      <Link href={getProjectPath({ userSlug, projectSlug, subpath: sitePaths.tasks.href }).href}>
+        <StatCard title="Incomplete" value={unfinished} />
+      </Link>
       <StatCard title="Completed" value={completed} />
-      <StatCard title="Incomplete" value={unfinished} />
       <StatCard title="Total Todos" value={total} />
       <StatCard title="Total Active" value={totalActive} />
       <StatCard title="Total Deleted" value={totalDeleted} />
@@ -60,12 +59,6 @@ export default async function ProjectPage({ params }: PageProps) {
       <WideCard title="Recently Deleted">
         <TaskList items={recentlyDeleted} />
       </WideCard>
-      {activeTasks.length > 0 && (
-        <div className="col-span-full">
-          <h2 className="mb-2 text-xl font-semibold">Tasks</h2>
-          <TaskGrid tasks={activeTasks} />
-        </div>
-      )}
     </div>
   );
 }

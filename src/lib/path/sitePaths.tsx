@@ -9,7 +9,7 @@ export type PathMetadata = {
 
 export const sitePaths = {
   dashboard: { label: 'Dashboard', href: 'dashboard' },
-  incomplete: { label: 'Incomplete', href: 'incomplete' },
+  tasks: { label: 'Tasks', href: 'tasks', icon: icons.tasks },
   complete: { label: 'Complete', href: 'complete' },
   trash: {
     label: 'Trash',

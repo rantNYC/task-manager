@@ -31,10 +31,12 @@ export async function handleAction(formData: FormData) {
   const slug = formData.get('slug') as string;
   const action = formData.get('action') as string;
 
+  console.log('action: ', action);
+
   switch (action) {
     case 'complete':
       return completeTodo(slug, true, '/');
-    case 'uncomplete':
+    case 'incomplete':
       return completeTodo(slug, false, '/');
     case 'delete':
       return deleteTodo(slug, true, '/');

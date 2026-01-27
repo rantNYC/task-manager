@@ -23,14 +23,14 @@ export default function TaskCard({ task, handleAction }: TodoCardProps) {
           type="submit"
           name="action"
           value={task.is_completed ? 'incomplete' : 'complete'}
-          className={`relative inline-flex h-5 w-10 items-center rounded-full transition-all ${
+          className={`relative inline-flex h-5 w-10 items-center rounded-full transition-all hover:cursor-pointer ${
             task.is_completed ? 'bg-green-500' : 'bg-gray-600'
           }`}
         >
           <span
             className={`inline-block h-4 w-4 rounded-full bg-gray-200 transition ${
               task.is_completed ? 'translate-x-5' : 'translate-x-1'
-            }`}
+            } `}
           />
         </button>
       </div>
@@ -53,7 +53,11 @@ export default function TaskCard({ task, handleAction }: TodoCardProps) {
           type="submit"
           name="action"
           value={task.is_deleted ? 'restore' : 'delete'}
-          className={`text-xs transition ${task.is_deleted ? 'text-blue-400' : 'text-red-400'}`}
+          className={`rounded-md px-3 py-1 text-xs font-medium transition-all duration-200 hover:scale-105 hover:cursor-pointer active:scale-95 ${
+            task.is_deleted
+              ? 'bg-blue-500 text-white hover:bg-blue-600'
+              : 'bg-red-500 text-white hover:bg-red-600'
+          } `}
         >
           {task.is_deleted ? 'Restore' : 'Delete'}
         </button>

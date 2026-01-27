@@ -99,4 +99,52 @@ export const icons = {
       />
     </svg>
   ),
+  tasks: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      className="h-5 w-5 transition-all duration-200 group-hover:text-indigo-400"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 6l1.5 1.5L8 5"
+        className="group-hover:animate-wiggle"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 12l1.5 1.5L8 11"
+        className="group-hover:animate-wiggle"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 18l1.5 1.5L8 17"
+        className="group-hover:animate-wiggle"
+      />
+
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M10 6h10"
+        className="group-hover:animate-wiggle"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M10 12h10"
+        className="group-hover:animate-wiggle"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M10 18h10"
+        className="group-hover:animate-wiggle"
+      />
+    </svg>
+  ),
 };
