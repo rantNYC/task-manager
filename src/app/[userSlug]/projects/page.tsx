@@ -15,9 +15,7 @@ export default async function ProjectsPage() {
       .filter(p => !p.is_deleted)
       .sort((p1, p2) => p1.created_at.getTime() - p2.created_at.getTime()) ?? [];
   const completedProjects = user?.projects.filter(p => !p.is_deleted) ?? [];
-  const deletedProject = user?.projects.filter(p => p.is_deleted) ?? [];
-
-  console.log('projects', activeProjects);
+  const deletedProjects = user?.projects.filter(p => p.is_deleted) ?? [];
 
   return (
     <div className="w-full max-w-3xl space-y-10 pt-4">
@@ -29,7 +27,9 @@ export default async function ProjectsPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <StatCard title="Total Projects" value={totalProjects} />
         <StatCard title="Active" value={activeProjects.length} />
-        <StatCard title="Deleted" value={deletedProject.length} />
+        <Link href={sitePaths.projectTrash.href}>
+          <StatCard title="Deleted" value={deletedProjects.length} />
+        </Link>
         <StatCard title="Completed" value={completedProjects.length} />
       </div>
 

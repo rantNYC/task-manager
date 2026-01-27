@@ -16,7 +16,8 @@ export const sitePaths = {
     href: 'trash',
     icon: icons.trash,
   },
-  projectCreate: { label: 'Project', href: 'projects/create' },
+  projectCreate: { label: 'Project Create', href: 'projects/create' },
+  projectTrash: { label: 'Project Delete', href: 'projects/trash' },
   home: {
     label: 'Home',
     href: '/',
