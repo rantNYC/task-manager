@@ -8,7 +8,7 @@ export default function TaskGrid({ tasks }: { tasks: Array<Task> }) {
     <div className={`grid ${gridCols} items-stretch gap-4`}>
       {tasks.map((item, idx) => (
         <div key={`todo-card-${idx}`} className="h-full">
-          <TaskCard task={item} handleAction={handleAction} />{' '}
+          <TaskCard task={item} handleAction={handleAction} />
         </div>
       ))}
     </div>
