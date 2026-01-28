@@ -171,10 +171,10 @@ export async function getDashboardStats({ tasks }: { tasks: Task[] }): Promise<D
   // --- BASIC COUNTS ---
   const total = tasks.length;
 
-  const completed = tasks.filter(t => t.status?.name === 'completed').length;
+  const completed = tasks.filter(t => t.status?.role === 'completed').length;
 
   const unfinished = tasks.filter(
-    t => t.status?.name !== 'completed' && t.status?.name !== 'deleted'
+    t => t.status?.role !== 'completed' && t.status?.role !== 'deleted'
   ).length;
 
   const completionRate = total === 0 ? 0 : Number(((completed / total) * 100).toFixed(2));
@@ -184,11 +184,11 @@ export async function getDashboardStats({ tasks }: { tasks: Task[] }): Promise<D
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
   const completedThisWeek = tasks.filter(
-    t => t.status?.name === 'completed' && t.completed_at && new Date(t.completed_at) >= oneWeekAgo
+    t => t.status?.role === 'completed' && t.completed_at && new Date(t.completed_at) >= oneWeekAgo
   ).length;
 
   // --- AVERAGE COMPLETION TIME ---
-  const completedTasks = tasks.filter(t => t.status?.name === 'completed');
+  const completedTasks = tasks.filter(t => t.status?.role === 'completed');
 
   const avgCompletionTime =
     completedTasks.length === 0
@@ -223,15 +223,15 @@ export async function getDashboardStats({ tasks }: { tasks: Task[] }): Promise<D
   // You probably want a due_date column later.
   const overdueTodos = tasks.filter(
     t =>
-      t.status?.name !== 'completed' &&
-      t.status?.name !== 'deleted' &&
+      t.status?.role !== 'completed' &&
+      t.status?.role !== 'deleted' &&
       t.deleted_at &&
       new Date(t.deleted_at) < new Date()
   ).length;
 
   // --- RECENTLY DELETED ---
   const recentlyDeleted = tasks
-    .filter(t => t.status?.name === 'deleted')
+    .filter(t => t.status?.role === 'deleted')
     .sort((a, b) => {
       const aTime = a.deleted_at ? new Date(a.deleted_at).getTime() : 0;
       const bTime = b.deleted_at ? new Date(b.deleted_at).getTime() : 0;
@@ -246,7 +246,7 @@ export async function getDashboardStats({ tasks }: { tasks: Task[] }): Promise<D
 
   // --- RECENTLY COMPLETED ---
   const recentlyCompleted = tasks
-    .filter(t => t.status?.name === 'completed')
+    .filter(t => t.status?.role === 'completed')
     .sort((a, b) => {
       const aTime = a.completed_at ? new Date(a.completed_at).getTime() : 0;
       const bTime = b.completed_at ? new Date(b.completed_at).getTime() : 0;
@@ -259,8 +259,8 @@ export async function getDashboardStats({ tasks }: { tasks: Task[] }): Promise<D
       localized: t.completed_at ? new Date(t.completed_at).toLocaleString() : 'N/A',
     }));
 
-  const totalActive = tasks.filter(t => t.status?.name !== 'deleted').length;
-  const totalDeleted = tasks.filter(t => t.status?.name === 'deleted').length;
+  const totalActive = tasks.filter(t => t.status?.role !== 'deleted').length;
+  const totalDeleted = tasks.filter(t => t.status?.role === 'deleted').length;
 
   return {
     total,
@@ -292,8 +292,8 @@ export async function getTaks({
   const { project } = await getProjectByUser({ projectSlug, userSlug });
   if (!project) throw new Error('Project not found');
   return project.tasks.filter(t => {
-    if (isDeleted !== undefined && t.status?.name !== 'deleted') return false;
-    return !(isCompleted !== undefined && t.status?.name !== 'completed');
+    if (isDeleted !== undefined && t.status?.role !== 'deleted') return false;
+    return !(isCompleted !== undefined && t.status?.role !== 'completed');
   });
 }
 
