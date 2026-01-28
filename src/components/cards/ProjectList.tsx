@@ -29,9 +29,13 @@ export function ProjectList({ items, projectPath }: ProjectListProps) {
             )}
           </div>
 
-          {/* Right side: icons */}
           <div className="flex items-center gap-3">
-            {/* Eye icon → open project */}
+            <Link
+              href={`${projectPath}/${project.slug}/tasks`}
+              className="group rounded p-1 text-gray-400 hover:bg-gray-800 hover:text-white"
+            >
+              {icons.tasks}
+            </Link>
             <Link
               href={`${projectPath}/${project.slug}`}
               className="group rounded p-1 text-gray-400 hover:bg-gray-800 hover:text-white"

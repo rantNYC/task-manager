@@ -1,5 +1,12 @@
 import bcrypt from 'bcrypt';
-import { getDb, getProjectRepository, getTaskRepository, getUserRepository, } from '@/lib/db/data-source';
+import {
+  getDb,
+  getProjectRepository,
+  getStatusRepository,
+  getTaskRepository,
+  getTaskStatusHistoryRepository,
+  getUserRepository,
+} from '@/lib/db/data-source';
 import { User } from '@/lib/db/entities/User';
 import { Task } from '@/lib/db/entities/Task';
 import { slugify } from '@/lib/core/utils';
@@ -154,7 +161,7 @@ export async function getProjectByUser({
 
   const project = await projectRepo.findOne({
     where: { slug: projectSlug, user: { slug: userSlug } },
-    relations: ['tasks'],
+    relations: ['tasks', 'tasks.status', 'tasks.priority', 'tasks.category', 'tasks.tags'],
   });
 
   return { success: true, project };
@@ -163,8 +170,12 @@ export async function getProjectByUser({
 export async function getDashboardStats({ tasks }: { tasks: Task[] }): Promise<DashboardStats> {
   // --- BASIC COUNTS ---
   const total = tasks.length;
-  const completed = tasks.filter(t => t.is_completed && !t.is_deleted).length;
-  const unfinished = tasks.filter(t => !t.is_completed && !t.is_deleted).length;
+
+  const completed = tasks.filter(t => t.status?.name === 'completed').length;
+
+  const unfinished = tasks.filter(
+    t => t.status?.name !== 'completed' && t.status?.name !== 'deleted'
+  ).length;
 
   const completionRate = total === 0 ? 0 : Number(((completed / total) * 100).toFixed(2));
 
@@ -173,30 +184,33 @@ export async function getDashboardStats({ tasks }: { tasks: Task[] }): Promise<D
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
   const completedThisWeek = tasks.filter(
-    t => t.is_completed && !t.is_deleted && new Date(t.updated_at) >= oneWeekAgo
+    t => t.status?.name === 'completed' && t.completed_at && new Date(t.completed_at) >= oneWeekAgo
   ).length;
 
   // --- AVERAGE COMPLETION TIME ---
-  const completedTasks = tasks.filter(t => t.is_completed && !t.is_deleted);
+  const completedTasks = tasks.filter(t => t.status?.name === 'completed');
 
   const avgCompletionTime =
     completedTasks.length === 0
       ? null
       : completedTasks.reduce((sum, t) => {
           const created = new Date(t.created_at).getTime();
-          const updated = new Date(t.updated_at).getTime();
-          return sum + (updated - created) / 1000; // seconds
+          const completedAt = t.completed_at ? new Date(t.completed_at).getTime() : created;
+          return sum + (completedAt - created) / 1000; // seconds
         }, 0) / completedTasks.length;
 
   // --- MOST ACTIVE DAY ---
   const dayCounts: Record<string, number> = {};
 
   completedTasks.forEach(t => {
-    const day = new Date(t.updated_at).toLocaleDateString('en-US', {
+    if (!t.completed_at) return;
+
+    const day = new Date(t.completed_at).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
     });
+
     dayCounts[day] = (dayCounts[day] || 0) + 1;
   });
 
@@ -206,13 +220,18 @@ export async function getDashboardStats({ tasks }: { tasks: Task[] }): Promise<D
       : Object.entries(dayCounts).sort((a, b) => b[1] - a[1])[0][0];
 
   // --- OVERDUE (placeholder logic) ---
+  // You probably want a due_date column later.
   const overdueTodos = tasks.filter(
-    t => !t.is_completed && !t.is_deleted && t.deleted_at && new Date(t.deleted_at) < new Date()
+    t =>
+      t.status?.name !== 'completed' &&
+      t.status?.name !== 'deleted' &&
+      t.deleted_at &&
+      new Date(t.deleted_at) < new Date()
   ).length;
 
   // --- RECENTLY DELETED ---
   const recentlyDeleted = tasks
-    .filter(t => t.is_deleted)
+    .filter(t => t.status?.name === 'deleted')
     .sort((a, b) => {
       const aTime = a.deleted_at ? new Date(a.deleted_at).getTime() : 0;
       const bTime = b.deleted_at ? new Date(b.deleted_at).getTime() : 0;
@@ -222,29 +241,26 @@ export async function getDashboardStats({ tasks }: { tasks: Task[] }): Promise<D
     .map(t => ({
       id: t.id,
       title: t.title,
-      localized: t.deleted_at
-        ? new Date(t.deleted_at).toLocaleString() // ← localized output
-        : 'N/A',
+      localized: t.deleted_at ? new Date(t.deleted_at).toLocaleString() : 'N/A',
     }));
 
+  // --- RECENTLY COMPLETED ---
   const recentlyCompleted = tasks
-    .filter(t => t.is_completed && !t.is_deleted)
+    .filter(t => t.status?.name === 'completed')
     .sort((a, b) => {
       const aTime = a.completed_at ? new Date(a.completed_at).getTime() : 0;
       const bTime = b.completed_at ? new Date(b.completed_at).getTime() : 0;
       return bTime - aTime;
     })
-    .slice(0, 5) // or however many you want
+    .slice(0, 5)
     .map(t => ({
       id: t.id,
       title: t.title,
-      localized: t.completed_at
-        ? new Date(t.completed_at).toLocaleString() // ← localized output
-        : 'N/A',
+      localized: t.completed_at ? new Date(t.completed_at).toLocaleString() : 'N/A',
     }));
 
-  const totalActive = tasks.filter(t => !t.is_deleted).length;
-  const totalDeleted = tasks.filter(t => t.is_deleted).length;
+  const totalActive = tasks.filter(t => t.status?.name !== 'deleted').length;
+  const totalDeleted = tasks.filter(t => t.status?.name === 'deleted').length;
 
   return {
     total,
@@ -276,7 +292,59 @@ export async function getTaks({
   const { project } = await getProjectByUser({ projectSlug, userSlug });
   if (!project) throw new Error('Project not found');
   return project.tasks.filter(t => {
-    if (isDeleted !== undefined && t.is_deleted !== isDeleted) return false;
-    return !(isCompleted !== undefined && t.is_completed !== isCompleted);
+    if (isDeleted !== undefined && t.status?.name !== 'deleted') return false;
+    return !(isCompleted !== undefined && t.status?.name !== 'completed');
   });
+}
+
+export async function getStatusByName(name: string) {
+  const repo = await getStatusRepository();
+  const status = await repo.findOne({ where: { name } });
+  if (!status) throw new Error(`Status "${name}" not found`);
+  return status;
+}
+
+export async function updateTaskStatus(taskSlug: string, newStatusName: string) {
+  const taskRepo = await getTaskRepository();
+  const statusRepo = await getStatusRepository();
+  const historyRepo = await getTaskStatusHistoryRepository();
+
+  const task = await taskRepo.findOne({
+    where: { slug: taskSlug },
+    relations: ['status'],
+  });
+
+  if (!task) throw new Error('Task not found');
+
+  const newStatus = await statusRepo.findOne({ where: { name: newStatusName } });
+  if (!newStatus) throw new Error(`Status "${newStatusName}" not found`);
+
+  const oldStatus = task.status;
+
+  const now = new Date();
+
+  if (newStatusName === 'completed') {
+    task.completed_at = now;
+  }
+
+  if (newStatusName === 'deleted') {
+    task.deleted_at = now;
+  }
+
+  if (newStatusName === 'in_progress') {
+    task.in_progress_at = now;
+  }
+
+  task.status = newStatus;
+
+  await taskRepo.save(task);
+
+  await historyRepo.save({
+    task,
+    old_status: oldStatus ?? null,
+    new_status: newStatus,
+    changed_at: now,
+  });
+
+  return { success: true, task };
 }

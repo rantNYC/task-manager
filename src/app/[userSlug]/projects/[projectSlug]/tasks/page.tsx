@@ -12,10 +12,10 @@ export default async function TasksPage({ params }: PageProps) {
   }
 
   const activeTasks = project.tasks
-    .filter(t => !t.is_deleted)
+    .filter(t => t.status?.name !== 'deleted')
     .sort((a, b) => {
-      if (a.is_completed !== b.is_completed) {
-        return a.is_completed ? 1 : -1;
+      if (a.status?.name !== b.status?.name) {
+        return a.status?.name === 'completed' ? 1 : -1;
       }
       return b.created_at.getTime() - a.created_at.getTime();
     });
