@@ -316,7 +316,7 @@ export async function updateTaskStatus(taskSlug: string, newStatusName: string) 
 
   if (!task) throw new Error('Task not found');
 
-  const newStatus = await statusRepo.findOne({ where: { name: newStatusName } });
+  const newStatus = await statusRepo.findOne({ where: { role: newStatusName } });
   if (!newStatus) throw new Error(`Status "${newStatusName}" not found`);
 
   const oldStatus = task.status;

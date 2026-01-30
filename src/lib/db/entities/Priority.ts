@@ -7,4 +7,7 @@ export class Priority {
 
   @Column({ type: 'varchar', length: 50, unique: true })
   name!: string;
+
+  @Column({ type: 'varchar', length: 50, unique: true })
+  color!: string;
 }

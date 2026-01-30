@@ -21,6 +21,7 @@ const AppDataSource = new DataSource({
   synchronize: true, // turn off in production
   logging: false,
   entities: [User, Project, Task, Priority, Status, Category, Tag, TaskStatusHistory],
+
 });
 
 export async function getDb() {

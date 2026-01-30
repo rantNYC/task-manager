@@ -13,12 +13,6 @@ export default async function TasksPage({ params }: PageProps) {
 
   const activeTasks = project.tasks
     .filter(t => t.status?.role !== 'deleted')
-    .sort((a, b) => {
-      if (a.status?.role !== b.status?.role) {
-        return a.status?.role === 'completed' ? 1 : -1;
-      }
-      return b.created_at.getTime() - a.created_at.getTime();
-    });
 
   if (activeTasks.length === 0) {
     return (
