@@ -14,7 +14,11 @@ import { DashboardStats } from '@/model/stats';
 import { Project } from '@/lib/db/entities/Project';
 import { Repository } from 'typeorm';
 
-export async function createUser(email: string, password: string, name: string) {
+export async function createUser(
+  email: string,
+  password: string,
+  name: string,
+) {
   const db = await getDb();
 
   const userRepo = db.getRepository(User);
@@ -76,7 +80,10 @@ export async function getAll({
   switch (repo) {
     case 'project':
       const projectDb = await getProjectRepository();
-      return { db: projectDb, all: await projectDb.findOne({ where: { slug } }) };
+      return {
+        db: projectDb,
+        all: await projectDb.findOne({ where: { slug } }),
+      };
     case 'task':
       const taskDb = await getTaskRepository();
       return { db: taskDb, all: await taskDb.findOne({ where: { slug } }) };
@@ -87,9 +94,19 @@ export async function getAll({
 
 type MarkAsValueInput =
   | { repo: 'task'; slug: string; column: keyof Task; value: Task[keyof Task] }
-  | { repo: 'project'; slug: string; column: keyof Project; value: Project[keyof Project] };
+  | {
+      repo: 'project';
+      slug: string;
+      column: keyof Project;
+      value: Project[keyof Project];
+    };
 
-export async function markAsValue({ slug, column, value, repo }: MarkAsValueInput) {
+export async function markAsValue({
+  slug,
+  column,
+  value,
+  repo,
+}: MarkAsValueInput) {
   const { db, all } = await getAll({ slug, repo });
   if (!all) {
     throw new Error('Value not found');
@@ -161,48 +178,64 @@ export async function getProjectByUser({
 
   const project = await projectRepo.findOne({
     where: { slug: projectSlug, user: { slug: userSlug } },
-    relations: ['tasks', 'tasks.status', 'tasks.priority', 'tasks.category', 'tasks.tags'],
+    relations: [
+      'tasks',
+      'tasks.status',
+      'tasks.priority',
+      'tasks.category',
+      'tasks.tags',
+    ],
   });
 
   return { success: true, project };
 }
 
-export async function getDashboardStats({ tasks }: { tasks: Task[] }): Promise<DashboardStats> {
+export async function getDashboardStats({
+  tasks,
+}: {
+  tasks: Task[];
+}): Promise<DashboardStats> {
   // --- BASIC COUNTS ---
   const total = tasks.length;
 
-  const completed = tasks.filter(t => t.status?.role === 'completed').length;
+  const completed = tasks.filter((t) => t.status?.role === 'completed').length;
 
   const unfinished = tasks.filter(
-    t => t.status?.role !== 'completed' && t.status?.role !== 'deleted'
+    (t) => t.status?.role !== 'completed' && t.status?.role !== 'deleted',
   ).length;
 
-  const completionRate = total === 0 ? 0 : Number(((completed / total) * 100).toFixed(2));
+  const completionRate =
+    total === 0 ? 0 : Number(((completed / total) * 100).toFixed(2));
 
   // --- COMPLETED THIS WEEK ---
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
   const completedThisWeek = tasks.filter(
-    t => t.status?.role === 'completed' && t.completed_at && new Date(t.completed_at) >= oneWeekAgo
+    (t) =>
+      t.status?.role === 'completed' &&
+      t.completed_at &&
+      new Date(t.completed_at) >= oneWeekAgo,
   ).length;
 
   // --- AVERAGE COMPLETION TIME ---
-  const completedTasks = tasks.filter(t => t.status?.role === 'completed');
+  const completedTasks = tasks.filter((t) => t.status?.role === 'completed');
 
   const avgCompletionTime =
     completedTasks.length === 0
       ? null
       : completedTasks.reduce((sum, t) => {
           const created = new Date(t.created_at).getTime();
-          const completedAt = t.completed_at ? new Date(t.completed_at).getTime() : created;
+          const completedAt = t.completed_at
+            ? new Date(t.completed_at).getTime()
+            : created;
           return sum + (completedAt - created) / 1000; // seconds
         }, 0) / completedTasks.length;
 
   // --- MOST ACTIVE DAY ---
   const dayCounts: Record<string, number> = {};
 
-  completedTasks.forEach(t => {
+  completedTasks.forEach((t) => {
     if (!t.completed_at) return;
 
     const day = new Date(t.completed_at).toLocaleDateString('en-US', {
@@ -222,23 +255,23 @@ export async function getDashboardStats({ tasks }: { tasks: Task[] }): Promise<D
   // --- OVERDUE (placeholder logic) ---
   // You probably want a due_date column later.
   const overdueTodos = tasks.filter(
-    t =>
+    (t) =>
       t.status?.role !== 'completed' &&
       t.status?.role !== 'deleted' &&
       t.deleted_at &&
-      new Date(t.deleted_at) < new Date()
+      new Date(t.deleted_at) < new Date(),
   ).length;
 
   // --- RECENTLY DELETED ---
   const recentlyDeleted = tasks
-    .filter(t => t.status?.role === 'deleted')
+    .filter((t) => t.status?.role === 'deleted')
     .sort((a, b) => {
       const aTime = a.deleted_at ? new Date(a.deleted_at).getTime() : 0;
       const bTime = b.deleted_at ? new Date(b.deleted_at).getTime() : 0;
       return bTime - aTime;
     })
     .slice(0, 5)
-    .map(t => ({
+    .map((t) => ({
       id: t.id,
       title: t.title,
       localized: t.deleted_at ? new Date(t.deleted_at).toLocaleString() : 'N/A',
@@ -246,21 +279,23 @@ export async function getDashboardStats({ tasks }: { tasks: Task[] }): Promise<D
 
   // --- RECENTLY COMPLETED ---
   const recentlyCompleted = tasks
-    .filter(t => t.status?.role === 'completed')
+    .filter((t) => t.status?.role === 'completed')
     .sort((a, b) => {
       const aTime = a.completed_at ? new Date(a.completed_at).getTime() : 0;
       const bTime = b.completed_at ? new Date(b.completed_at).getTime() : 0;
       return bTime - aTime;
     })
     .slice(0, 5)
-    .map(t => ({
+    .map((t) => ({
       id: t.id,
       title: t.title,
-      localized: t.completed_at ? new Date(t.completed_at).toLocaleString() : 'N/A',
+      localized: t.completed_at
+        ? new Date(t.completed_at).toLocaleString()
+        : 'N/A',
     }));
 
-  const totalActive = tasks.filter(t => t.status?.role !== 'deleted').length;
-  const totalDeleted = tasks.filter(t => t.status?.role === 'deleted').length;
+  const totalActive = tasks.filter((t) => t.status?.role !== 'deleted').length;
+  const totalDeleted = tasks.filter((t) => t.status?.role === 'deleted').length;
 
   return {
     total,
@@ -291,7 +326,7 @@ export async function getTaks({
 }) {
   const { project } = await getProjectByUser({ projectSlug, userSlug });
   if (!project) throw new Error('Project not found');
-  return project.tasks.filter(t => {
+  return project.tasks.filter((t) => {
     if (isDeleted !== undefined && t.status?.role !== 'deleted') return false;
     return !(isCompleted !== undefined && t.status?.role !== 'completed');
   });
@@ -304,7 +339,10 @@ export async function getStatusByName(name: string) {
   return status;
 }
 
-export async function updateTaskStatus(taskSlug: string, newStatusName: string) {
+export async function updateTaskStatus(
+  taskSlug: string,
+  newStatusName: string,
+) {
   const taskRepo = await getTaskRepository();
   const statusRepo = await getStatusRepository();
   const historyRepo = await getTaskStatusHistoryRepository();
@@ -316,7 +354,9 @@ export async function updateTaskStatus(taskSlug: string, newStatusName: string) 
 
   if (!task) throw new Error('Task not found');
 
-  const newStatus = await statusRepo.findOne({ where: { role: newStatusName } });
+  const newStatus = await statusRepo.findOne({
+    where: { role: newStatusName },
+  });
   if (!newStatus) throw new Error(`Status "${newStatusName}" not found`);
 
   const oldStatus = task.status;

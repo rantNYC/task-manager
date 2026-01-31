@@ -1,49 +1,78 @@
-type Props = {
-  tags: string[];
-  statuses: string[];
-  searchParams: {
-    sort?: string;
-    role?: string;
-    tag?: string;
-    status?: string;
-  };
+import { Task } from '@/lib/db/entities/Task';
+import Link from 'next/link';
+import FilterPill from '@/components/filters/FilterPill';
+import { buildSearchParams, TaskSearchParams, toggleValue, } from '@/lib/core/filters';
+import { capitalize, extractUniqueValues } from '@/lib/core/utils';
+import { SearchParams } from '@/model/page';
+
+type TaskFiltersProps = {
+  tasks: Task[];
+  filters: TaskSearchParams;
 };
 
-export default function TaskFilters({ statuses, searchParams }: Props) {
-  const currentStatus = searchParams.status ?? "";
+const FilterCollection = ({
+  title,
+  toggle,
+  params,
+  values,
+}: {
+  title: string;
+  toggle: keyof TaskSearchParams;
+  params: SearchParams;
+  values: Array<{ name: string; color: string }>;
+}) => {
+  const current = params[toggle];
 
-  const buildUrl = (params: Record<string, string | null>) => {
-    const url = new URLSearchParams(searchParams as Record<string, string>);
-    Object.entries(params).forEach(([key, value]) =>
-      value === null ? url.delete(key) : url.set(key, value)
-    );
-    return url.toString();
+  return (
+    <div className='flex flex-wrap gap-2'>
+      <span className='content-center'>{title}:</span>
+      {values.map((priority, idx) => (
+        <Link
+          key={idx}
+          href={buildSearchParams(params, {
+            [toggle]: toggleValue(current, priority.name),
+          })}
+        >
+          <FilterPill
+            active={current?.includes(priority.name) ?? false}
+            color={priority.color}
+          >
+            {capitalize(priority.name)}
+          </FilterPill>
+        </Link>
+      ))}
+    </div>
+  );
+};
+
+export default function TaskFilters({ tasks, filters }: TaskFiltersProps) {
+  const availableFilters = {
+    priorities: extractUniqueValues(
+      tasks,
+      (task) => task.priority?.id ?? null,
+      (task) => task.priority!,
+    ),
+    categories: extractUniqueValues(
+      tasks,
+      (task) => task.category?.id ?? null,
+      (task) => task.category!,
+    ),
   };
 
   return (
-    <form method="GET">
-      <label htmlFor="status">Status</label>
-      <select
-        id="status"
-        name="status"
-        defaultValue={searchParams.status ?? ""}
-      >
-        <option value="">All</option>
-        {statuses.map((status) => (
-          <option key={status} value={status}>
-            {status}
-          </option>
-        ))}
-      </select>
-
-      <button type="submit">Apply</button>
-
-      {Object.entries(searchParams).map(([key, value]) => {
-        if (key === "status") return null;
-        if (!value) return null;
-        return <input key={key} type="hidden" name={key} value={value} />;
-      })}
-    </form>
-
+    <>
+      <FilterCollection
+        title='Priorities'
+        toggle='priorities'
+        params={filters}
+        values={availableFilters.priorities}
+      />
+      <FilterCollection
+        title={'Collections'}
+        toggle='categories'
+        params={filters}
+        values={availableFilters.categories}
+      />
+    </>
   );
 }

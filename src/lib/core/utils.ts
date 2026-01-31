@@ -7,7 +7,7 @@ export const slugify = (text: string) => {
 };
 
 export const sleep = (ms: number) => {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
 export const formatDuration = (seconds: number) => {
@@ -24,3 +24,31 @@ export const formatDuration = (seconds: number) => {
   if (weeks < 4) return `${weeks.toFixed(1)} weeks`;
   return `${months.toFixed(1)} months`;
 };
+
+export function extractUniqueValues<T, K, V>(
+  items: T[],
+  keyFn: (item: T) => K | null | undefined,
+  valueFn: (item: T) => V,
+): V[] {
+  const map = new Map<K, V>();
+
+  for (const item of items) {
+    const key = keyFn(item);
+    if (key != null) {
+      map.set(key, valueFn(item));
+    }
+  }
+
+  return [...map.values()];
+}
+
+export const capitalize = (str?: string | null) => {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
+export const capitalizeWords = (str: string) =>
+  str
+    .split(' ')
+    .map((word) => capitalize(word))
+    .join(' ');
