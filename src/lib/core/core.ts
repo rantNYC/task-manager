@@ -365,6 +365,8 @@ export async function updateTaskStatus(
 
   if (newStatusName === 'completed') {
     task.completed_at = now;
+  } else {
+    task.completed_at = null;
   }
 
   if (newStatusName === 'deleted') {

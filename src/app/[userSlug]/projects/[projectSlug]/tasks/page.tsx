@@ -2,7 +2,7 @@ import TaskGrid from '@/components/TaskGrid';
 import { notFound } from 'next/dist/client/components/not-found';
 import { PageProps } from '@/model/page';
 import { getProjectByUser } from '@/lib/core/core';
-import { extractFilters, filterTasks } from '@/lib/core/filters';
+import { extractFilters, filterTasks, sortTasks } from '@/lib/core/filters';
 import TaskFilters from '@/components/filters/TaskFilters';
 
 export default async function TasksPage({ params, searchParams }: PageProps) {
@@ -14,7 +14,9 @@ export default async function TasksPage({ params, searchParams }: PageProps) {
   }
   const filters = extractFilters(await searchParams);
   const activeTasks = project.tasks.filter((t) => t.status?.role !== 'deleted');
-  const filteredTasks = activeTasks.filter(filterTasks(filters));
+  const filteredTasks = activeTasks
+    .filter(filterTasks(filters))
+    .sort(sortTasks(filters));
 
   return (
     <div className='grid gap-2 col-span-full'>

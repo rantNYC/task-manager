@@ -85,22 +85,17 @@ export default function TaskCard({ task, handleAction }: TodoCardProps) {
         )}
       </div>
 
-      {/* Timestamps */}
       <div className='mt-3 text-sm  space-y-1'>
-        <p>Created: {new Date(task.created_at).toLocaleDateString()}</p>
+        <p>Created: {new Date(task.created_at).toLocaleString()}</p>
       </div>
 
       <div className='flex items-center justify-between pt-4'>
         <span
-          className={`text-xs font-medium ${
-            task.status?.role === 'completed'
-              ? 'text-green-400'
-              : 'text-gray-500'
-          }`}
+          className={`text-xs font-medium`}
+          style={{ color: task.status?.color }}
         >
-          {task.status?.role === 'completed'
-            ? `Completed ${task.completed_at ? task.completed_at.toLocaleString() : ''}`
-            : 'Pending'}
+          {task.status?.name}{' '}
+          {task.completed_at && task.completed_at.toLocaleString()}
         </span>
 
         <button

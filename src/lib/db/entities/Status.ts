@@ -10,4 +10,7 @@ export class Status {
 
   @Column({ type: 'varchar', length: 50 })
   role!: string;
+
+  @Column({ type: 'varchar', length: 50 })
+  color!: string;
 }
